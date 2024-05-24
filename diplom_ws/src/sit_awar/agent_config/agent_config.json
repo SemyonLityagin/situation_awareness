@@ -1,0 +1,22 @@
+{
+    "agent_name": "agent0",
+    "sensors": [
+        {
+            "sensor": "radar",
+            "topic": "radar"
+        },
+        {
+            "sensor": "camera",
+            "topic": "camera"
+        },
+        {
+            "sensor": "comm",
+            "topic": "comm"
+        },
+        {
+            "sensor": "local",
+            "topic": "local"
+        }
+
+    ]
+}
