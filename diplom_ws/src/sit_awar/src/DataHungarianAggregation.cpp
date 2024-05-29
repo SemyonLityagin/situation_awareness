@@ -171,7 +171,15 @@ std::vector<SensorData> DataHungarianAggregation::do_aggregation(std::vector<Sen
             //--------------------FOR FP TP LOGGER--------------------------
             this->logger << "TP_" << TP << "_TN_" << TN << "_FP_" << FP << "_FN_" << FN << "|";
             std::cout << "TP_" << TP << "_TN_" << TN << "_FP_" << FP << "_FN_" << FN << "\n";
-            std::cout << "TPR_" << TP/(TP+FN) << "_FPR_" << FP/(FP+TN) << "\n";
+            float TPR = 0.0;
+            float FPR = 0.0;
+	    if(TP + FN != 0) {
+	    	TPR = TP / (TP+FN);
+	    }
+	    if(FP + TN != 0) {
+	    	FPR = FP / (FP+TN);
+	    }
+	    std::cout << "TPR_" << TPR << "_FPR_" << FPR << "\n";
         }
 
     }
