@@ -7,7 +7,7 @@
 
 Запуск в докере из корня репозитория на Windows:
 1. docker build --tag sit_awar .
-2. запуск с примонтированием рабочей директории: docker run -it -v %cd%/diplom_ws:/diplom_ws situation_awareness
+2. запуск с примонтированием рабочей директории: docker run -it -v %cd%/diplom_ws:/diplom_ws sit_awar
 3. Выполните в терминале следующие команды:
      - cd diplom_ws
      - colcon build
