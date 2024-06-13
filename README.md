@@ -1,17 +1,15 @@
 # Подсистема оценки обстановки Интеллектуального Агента в среде ROS2
 
 Проект представляет собой реализацию подсистемы оценки обстановки (ПОО) интеллектуального агента (ИА), которая формирует объектное представление о среде.  
-**Замечание**: реализация ориентирована на снятие метрик TP, FP, TN, FN - для применения нужно удалить лишние поля в msg-файлах (scen_id, agg_id, fil_id из SensorData) и строки кода для работы с ними в diplom_ws\src\sit_awar\src\DataHungarianAggregation.cpp и diplom_ws\src\sit_awar\src\DataKalmanFilter.cpp
+**Замечание**: реализация ориентирована на снятие метрик TP, FP, TN, FN - для применения в живом проекте нужно удалить лишние поля в msg-файлах (scen_id, agg_id, fil_id из SensorData) и строки кода для работы с ними в diplom_ws\src\sit_awar\src\DataHungarianAggregation.cpp и diplom_ws\src\sit_awar\src\DataKalmanFilter.cpp
 
 ## Установка
 
-Проект функционировал на виртуальной машине Ubuntu 22.04
-1. Установите [ROS2 Humble](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html)
-2. Установите [Eigen 3.4.0](https://gitlab.com/libeigen/eigen/-/releases) - требуется для реализованного фильтра
-3. Выполните в терминале следующие команды (не закрывайте терминал):
-     - git clone https://github.com/SemyonLityagin/situation_awareness.git
-     - cd situation_awareness/diplom_ws
-     - source /opt/ros/humble/setup.bash
+Запуск в докере из корня репозитория на Windows:
+1. docker build --tag sit_awar .
+2. запуск с примонтированием рабочей директории: docker run -it -v %cd%/diplom_ws:/diplom_ws situation_awareness
+3. Выполните в терминале следующие команды:
+     - cd diplom_ws
      - colcon build
      - source install/setup.bash
 4. Выполните генерацию сценария с помощью скрипта scenario_gen.py репозитория (ПОО создает ноду в пространстве agent0, поэтому генерируйте с ориентацией на то, что моделируется агент с именем agent_name = agent0)
@@ -19,8 +17,7 @@
 6. Парсер читает файл plan_scenario.json, сформированный генератором, и формурует файл server_data.json
 7. Поместите его в директорию diplom_ws\install\server\share\server\scenario
 8. В директории diplom_ws\install\sit_awar\share\sit_awar\agent_config лежит файл конфигурации ПОО, где указываются топики для подписки и наименование агента. Сервер отправляет посылки агенту по указанному в этом конфиге имени
-9. Вернитесь в терминал пункта 3 (если закрыли - вернитесь в директорию situation_awareness/diplom_ws и пропишите строчки с "source" пункта 3)
-10. Запустите ноды командой (в консоли выводятся метрики FPR и TPR для модуля агрегации и фильтрации в рамках такта работы ПОО):
+9. Запустите ноды командой (в консоли выводятся метрики FPR и TPR для модуля агрегации и фильтрации в рамках такта работы ПОО):
       - ros2 launch server server.launch.py
 
 ## Файлы логов

@@ -71,11 +71,35 @@ class Server(Node):
         comms = []
         try:
             comms = self.scenario[sensor_name][str(t)][self.agent_name]["detections"]
+            
+            msgs = []
+            for detections in comms:
+                msg = SensorPack()
+                msg.sensor = sensor_name
+                msg.objects = []
+
+                for obj_detection in detections:
+                    obj = SensorData()
+                    obj.scen_id = str(obj_detection["obj_id"])
+                    obj.category = obj_detection["category"]
+                    obj.obj_class = obj_detection["class"]
+                    obj.obj_type = obj_detection["type"]
+                    obj.class_conf = obj_detection["classConf"]
+                    obj.type_conf = obj_detection["typeConf"]
+                    obj.distance = obj_detection["distance"]
+                    obj.azimuth = obj_detection["azimuth"]
+                    obj.friendly = obj_detection["friendly"]
+                    msg.objects.append(obj)
+                msgs.append(msg)
+            return msgs
         except Exception as e:
             self.get_logger().info("{} {} {}".format(sensor_name, str(t), str(e)))
-        
-        msgs = []
-        for detections in comms:
+        return None
+    def get_sensor_pack_by_t_counter(self, sensor_name, t):
+        detections = []
+        try:
+            detections = self.scenario[sensor_name][str(t)][self.agent_name]["detections"]
+
             msg = SensorPack()
             msg.sensor = sensor_name
             msg.objects = []
@@ -92,74 +116,60 @@ class Server(Node):
                 obj.azimuth = obj_detection["azimuth"]
                 obj.friendly = obj_detection["friendly"]
                 msg.objects.append(obj)
-            msgs.append(msg)
-        return msgs
-
-    def get_sensor_pack_by_t_counter(self, sensor_name, t):
-        detections = []
-        try:
-            detections = self.scenario[sensor_name][str(t)][self.agent_name]["detections"]
+            return msg
         except Exception as e:
             self.get_logger().info("{} {} {}".format(sensor_name, str(t), str(e)))
-            
-        msg = SensorPack()
-        msg.sensor = sensor_name
-        msg.objects = []
-
-        for obj_detection in detections:
-            obj = SensorData()
-            obj.scen_id = str(obj_detection["obj_id"])
-            obj.category = obj_detection["category"]
-            obj.obj_class = obj_detection["class"]
-            obj.obj_type = obj_detection["type"]
-            obj.class_conf = obj_detection["classConf"]
-            obj.type_conf = obj_detection["typeConf"]
-            obj.distance = obj_detection["distance"]
-            obj.azimuth = obj_detection["azimuth"]
-            obj.friendly = obj_detection["friendly"]
-            msg.objects.append(obj)
-        return msg
+        return None
     
     def get_self_state_by_t_counter(self, sensor_name, t):
-        self_state = self.scenario[sensor_name][str(t)][self.agent_name]
-
-        msg = SelfObjectState()
-
-        msg.vel_dist = self_state["velDist"]
-        msg.vel_azim = self_state["velAzim"]
-        msg.distance = self_state["distance"]
-        msg.azimuth = self_state["azimuth"]
-        msg.orientation = self_state["orientation"]
-        return msg
+        self_state = None
+        try:
+            self_state = self.scenario[sensor_name][str(t)][self.agent_name]
+            
+            msg = SelfObjectState()
+            
+            msg.vel_dist = self_state["velDist"]
+            msg.vel_azim = self_state["velAzim"]
+            msg.distance = self_state["distance"]
+            msg.azimuth = self_state["azimuth"]
+            msg.orientation = self_state["orientation"]
+            return msg
+        except Exception as e:
+            self.get_logger().info("Self state ending")
+        return None
 
     def timer_radar_callback(self):
         sensor_name = "radar"
         t = self.sensor_counter[sensor_name]
         msg = self.get_sensor_pack_by_t_counter(sensor_name, t)
-        self.agent_publishers[sensor_name].publish(msg)
-        self.sensor_counter[sensor_name]+=1
+        if msg:
+            self.agent_publishers[sensor_name].publish(msg)
+            self.sensor_counter[sensor_name]+=1
 
     def timer_camera_callback(self):
         sensor_name = "camera"
         t = self.sensor_counter[sensor_name]
         msg = self.get_sensor_pack_by_t_counter(sensor_name, t)
-        self.agent_publishers[sensor_name].publish(msg)
-        self.sensor_counter[sensor_name]+=1
+        if msg:
+            self.agent_publishers[sensor_name].publish(msg)
+            self.sensor_counter[sensor_name]+=1
 
     def timer_comm_callback(self):
         sensor_name = "comm"
         t = self.sensor_counter[sensor_name]
         msgs = self.get_sensor_packs_comm_by_t_counter(sensor_name, t)
-        for msg in msgs:
-            self.agent_publishers[sensor_name].publish(msg)
-        self.sensor_counter[sensor_name]+=1
+        if msgs:
+            for msg in msgs:
+                self.agent_publishers[sensor_name].publish(msg)
+            self.sensor_counter[sensor_name]+=1
 
     def timer_local_callback(self):
         sensor_name = "local"
         t = self.sensor_counter[sensor_name]
         msg = self.get_self_state_by_t_counter(sensor_name, t)
-        self.agent_publishers[sensor_name].publish(msg)
-        self.sensor_counter[sensor_name]+=1
+        if msg:
+            self.agent_publishers[sensor_name].publish(msg)
+            self.sensor_counter[sensor_name]+=1
 
 def main(args=None):
     rclpy.init(args=args)
